@@ -1,0 +1,480 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <meta name="theme-color" content="#050608">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="format-detection" content="telephone=no">
+  <title>Acharya EVS Quiz-01 | Team 1 Assessment Portal</title>
+  <meta name="description" content="Official EVS Quiz 01 Session Portal on Ecosystems by Team 1 at Acharya Institutes. Features instant evaluation, PDF scorecards, and CSV reports.">
+  
+  <!-- Modern Typography -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600;700&family=Outfit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+
+  <!-- Core Stylesheet -->
+  <link rel="stylesheet" href="styles.css">
+
+  <!-- PDF Generation Libraries -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js"></script>
+</head>
+<body>
+
+  <!-- Top Navigation / Branding Header -->
+  <header class="app-header">
+    <div class="header-container">
+      <div class="brand-section">
+        <div class="brand-logo-wrap">
+          <img src="assets/acharya-logo-transparent.png" alt="Acharya Institutes Logo" class="brand-logo" id="headerLogo">
+        </div>
+        <div class="brand-info">
+          <div class="brand-title">
+            <span>ACHARYA INSTITUTES</span>
+            <span class="brand-badge">EVS QUIZ - 01</span>
+          </div>
+          <span class="brand-sub">Subject: Environmental Studies • Ecosystem Assessment</span>
+        </div>
+      </div>
+
+      <div class="header-actions">
+        <div class="team-pill">
+          <span class="dot"></span>
+          <span>Team 1</span>
+        </div>
+        <button id="btnTeacherDash" class="btn-teacher-toggle" title="Instructor / Team 1 Dashboard">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+          <span>Class Report</span>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- Main Content Area -->
+  <main class="main-wrapper">
+
+    <!-- 1. LOGIN / REGISTRATION VIEW -->
+    <section id="loginView" class="view-section active">
+      <div class="quiz-card">
+          <div class="login-header">
+            <div class="login-tag">Class Assessment Session</div>
+            <h1 class="login-title">Student Quiz Login</h1>
+            <p class="login-subtitle">Please enter your student credentials to begin the EVS Quiz - 01 assessment on Ecosystems.</p>
+
+            <div class="quiz-info-pills">
+              <span class="info-badge">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+                15 Questions
+              </span>
+              <span class="info-badge" style="border-color: rgba(245, 158, 11, 0.4); color: #fbbf24;">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+                15s Per Question
+              </span>
+            </div>
+          </div>
+
+          <form id="studentLoginForm" class="login-form" novalidate>
+            <div class="form-group full-width">
+              <label for="studentName" class="form-label">
+                <span>Full Name</span>
+                <span class="required">*</span>
+              </label>
+              <div class="input-wrapper">
+                <span class="input-icon">
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+                </span>
+                <input type="text" id="studentName" class="form-input" placeholder="e.g. Shubham Kumar" required autocomplete="name" autocapitalize="words" autocorrect="off" spellcheck="false" inputmode="text">
+              </div>
+            </div>
+
+            <div class="form-grid">
+              <div class="form-group">
+                <label for="studentUsn" class="form-label">
+                  <span>USN</span>
+                  <span class="required">*</span>
+                </label>
+                <div class="input-wrapper">
+                  <span class="input-icon">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="16" rx="2"/><line x1="7" y1="8" x2="17" y2="8"/><line x1="7" y1="12" x2="17" y2="12"/><line x1="7" y1="16" x2="12" y2="16"/></svg>
+                  </span>
+                  <input type="text" id="studentUsn" class="form-input uppercase" placeholder="e.g. 1AY24CS105" required autocomplete="off" autocapitalize="characters" autocorrect="off" spellcheck="false" inputmode="text">
+                </div>
+                <span class="input-hint">College University Seat Number (2024 Batch)</span>
+              </div>
+
+              <div class="form-group">
+                <label for="studentSection" class="form-label">
+                  <span>Section</span>
+                  <span class="required" style="color: var(--accent-cyan); font-size: 0.75rem; font-weight: 600;">(Section D Only)</span>
+                </label>
+                <div class="input-wrapper">
+                  <span class="input-icon">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+                  </span>
+                  <input type="text" id="studentSection" class="form-input" value="Section D" readonly style="cursor: default; background: rgba(255, 255, 255, 0.04); color: var(--accent-cyan); font-weight: 600; border-color: rgba(56, 189, 248, 0.3);">
+                </div>
+                <span class="input-hint">This assessment is exclusively for Section D</span>
+              </div>
+            </div>
+
+            <div class="form-group full-width">
+              <label for="studentEmail" class="form-label">
+                <span>Acharya Email ID</span>
+                <span class="required">*</span>
+              </label>
+              <div class="input-wrapper">
+                <span class="input-icon">
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+                </span>
+                <input type="email" id="studentEmail" class="form-input" placeholder="e.g. shubham.24.ise@acharya.ac.in" required autocomplete="email" autocapitalize="none" autocorrect="off" spellcheck="false" inputmode="email">
+              </div>
+              <span class="input-hint">Official Acharya institutional email (@acharya.ac.in)</span>
+            </div>
+
+            <div class="instructions-panel">
+              <h4>
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
+                Quiz Instructions & Rules
+              </h4>
+              <ul>
+                <li>15 Multiple Choice Questions on Ecosystems based on the official course material.</li>
+                <li><strong style="color: #fbbf24;">15 Seconds per Question:</strong> Live real-time countdown; advances automatically on 0.</li>
+                <li><strong style="color: var(--accent-cyan);">⚡ Fastest-Finger Touch (Kahoot Style):</strong> Faster correct answers earn maximum speed points and bonus merit marks!</li>
+                <li>Instant verified Acharya PDF Scorecard & CSV downloads upon submission.</li>
+              </ul>
+            </div>
+
+          <button type="submit" id="btnStartQuiz" class="btn-primary">
+            <span>Start EVS Quiz</span>
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"/></svg>
+          </button>
+        </form>
+      </div>
+    </section>
+
+    <!-- 2. QUIZ INTERACTION VIEW -->
+    <section id="quizView" class="view-section">
+      <div class="quiz-card">
+        
+        <!-- Top Bar with student details and timer -->
+        <div class="quiz-top-bar">
+          <div class="student-session-chip">
+            <div class="avatar-initials" id="activeStudentInitials">AS</div>
+            <div class="session-student-details">
+              <span class="session-student-name" id="activeStudentName">Student Name</span>
+              <span class="session-student-meta">
+                <span id="activeStudentUsn">1AY24...</span> • <span id="activeStudentSection">Section D</span>
+              </span>
+            </div>
+          </div>
+
+          <div class="quiz-status-chips">
+            <!-- Kahoot Fastest-Finger Live Score Chip -->
+            <div class="kahoot-points-chip" id="kahootPointsChip" title="Kahoot Fastest-Finger Speed Score">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+              <span>Points: <strong id="livePointsDisplay">0</strong></span>
+            </div>
+
+            <!-- 15-Second Question Countdown Chip -->
+            <div class="question-countdown-chip" id="qTimerChip" title="Time remaining for this question">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+              <span>Timer: <strong id="qTimerSeconds">15s</strong></span>
+            </div>
+
+            <div class="timer-chip" title="Total Session Time Elapsed">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+              <span id="timerDisplay">00:00</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Progress Tracker -->
+        <div class="progress-header">
+          <span class="progress-counter">Question <span id="currentQNum">1</span> of 15</span>
+          <span id="progressPercent" style="font-family: var(--font-mono); color: var(--accent-cyan);">7%</span>
+        </div>
+        <div class="progress-bar-container">
+          <div class="progress-bar-fill" id="progressBarFill"></div>
+        </div>
+
+        <!-- 15-Second Question Countdown Progress Bar -->
+        <div class="q-timer-track" title="15s Question Countdown">
+          <div class="q-timer-fill" id="qTimerFill"></div>
+        </div>
+
+        <!-- Question Body -->
+        <div class="question-container">
+          <div class="question-meta-row">
+            <span class="topic-badge" id="qTopicBadge">Ecosystem Topic</span>
+            <span class="diff-badge" id="qDiffBadge">Easy</span>
+          </div>
+
+          <h2 class="question-title" id="questionText">Question loading...</h2>
+
+          <!-- 4 Options -->
+          <div class="options-grid" id="optionsContainer">
+            <!-- Rendered dynamically -->
+          </div>
+
+          <!-- Fastest Finger Kahoot floating popup -->
+          <div id="speedFeedbackPopup" class="speed-feedback-popup"></div>
+
+          <div class="auto-switch-notice">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>
+            <span>Selecting an answer automatically advances to the next question</span>
+          </div>
+        </div>
+
+        <!-- Navigation Controls -->
+        <div class="quiz-nav-row">
+          <button id="btnPrevQ" class="btn-nav-quiz" disabled>
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 18 9 12 15 6"/></svg>
+            <span>Previous</span>
+          </button>
+
+          <button id="btnNextQ" class="btn-nav-quiz">
+            <span>Next</span>
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>
+          </button>
+
+          <button id="btnFinishQuiz" class="btn-nav-quiz btn-nav-submit" style="display: none;">
+            <span>Submit Quiz</span>
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+          </button>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- 3. RESULTS & REPORT VIEW -->
+    <section id="resultsView" class="view-section">
+      <div class="quiz-card">
+        
+        <div class="results-hero">
+          <div class="score-circle-wrapper">
+            <svg class="score-svg" viewBox="0 0 160 160">
+              <circle class="score-circle-bg" cx="80" cy="80" r="70" />
+              <circle class="score-circle-bar" id="scoreCircleBar" cx="80" cy="80" r="70" />
+            </svg>
+            <div class="score-circle-inner">
+              <span class="score-display-number" id="finalScoreVal">14</span>
+              <span class="score-display-total">out of 15</span>
+            </div>
+          </div>
+
+          <h2 class="results-verdict" id="resultsVerdict">Excellent Performance!</h2>
+          <div class="results-percentage-badge" id="resultsPercentBadge">93.3% Accuracy</div>
+        </div>
+
+        <!-- Kahoot-Style Fastest-Finger Performance Box -->
+        <div class="speed-analytics-panel">
+          <div class="speed-panel-header">
+            <div style="display: flex; align-items: center; gap: 10px;">
+              <span class="speed-bolt-icon">⚡</span>
+              <div>
+                <h3 class="speed-panel-title">Fastest-Finger Touch Analytics</h3>
+                <p class="speed-panel-desc">Calculated via Acharya Speed-Accuracy Merit Index</p>
+              </div>
+            </div>
+            <span class="reflex-tier-badge" id="reflexTierBadge">⚡ Tier S+</span>
+          </div>
+
+          <div class="speed-stats-grid">
+            <div class="speed-stat-card">
+              <span class="speed-stat-num" id="totalPointsDisplay">0</span>
+              <span class="speed-stat-label">Fastest-Finger Points</span>
+            </div>
+            <div class="speed-stat-card">
+              <span class="speed-stat-num" id="avgSpeedDisplay">0.0s</span>
+              <span class="speed-stat-label">Avg Response Speed</span>
+            </div>
+            <div class="speed-stat-card">
+              <span class="speed-stat-num" id="fastestAnswerDisplay">0.0s</span>
+              <span class="speed-stat-label">Fastest Answer</span>
+            </div>
+            <div class="speed-stat-card">
+              <span class="speed-stat-num" id="meritScoreDisplay">0.0</span>
+              <span class="speed-stat-label">Merit Adjusted Mark</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Student Recap Information -->
+        <div class="student-recap-box">
+          <div class="recap-item">
+            <span class="recap-label">Candidate Name</span>
+            <span class="recap-value" id="recapName">Shubham Kumar</span>
+          </div>
+          <div class="recap-item">
+            <span class="recap-label">USN</span>
+            <span class="recap-value" id="recapUsn">1AY24CS105</span>
+          </div>
+          <div class="recap-item">
+            <span class="recap-label">Section</span>
+            <span class="recap-value" id="recapSection">Section D</span>
+          </div>
+          <div class="recap-item">
+            <span class="recap-label">Acharya Email</span>
+            <span class="recap-value" id="recapEmail">shubham.24.ise@acharya.ac.in</span>
+          </div>
+          <div class="recap-item">
+            <span class="recap-label">Session Code</span>
+            <span class="recap-value">EVS-01 (Team 1)</span>
+          </div>
+          <div class="recap-item">
+            <span class="recap-label">Time Spent</span>
+            <span class="recap-value" id="recapDuration">03:15 mins</span>
+          </div>
+        </div>
+
+        <!-- Action Buttons: Download PDF, Download CSV, Restart -->
+        <div class="results-actions-grid">
+          <button id="btnDownloadPdf" class="btn-report-action btn-pdf-download">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
+            <span>Download PDF Report</span>
+          </button>
+
+          <button id="btnDownloadCsv" class="btn-report-action btn-csv-download">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+            <span>Download CSV Report</span>
+          </button>
+
+          <button id="btnNewStudent" class="btn-report-action btn-restart">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21.5 2v6h-6M21.34 15.57a10 10 0 1 1-.57-8.38l5.67-5.67"/></svg>
+            <span>Next Candidate Login</span>
+          </button>
+        </div>
+
+        <!-- Topic Breakdown Section -->
+        <div class="topic-breakdown-section">
+          <div class="section-subtitle">
+            <span>Topic-wise Performance</span>
+            <span style="font-size: 0.8rem; color: var(--text-muted); font-weight: 500;">4 Knowledge Areas</span>
+          </div>
+          <div class="topic-bars-grid" id="topicBarsContainer">
+            <!-- Rendered dynamically -->
+          </div>
+        </div>
+
+        <!-- Detailed Review Section -->
+        <div class="review-section">
+          <div class="section-subtitle">
+            <span>Detailed Question Review & Explanations</span>
+            <span style="font-size: 0.8rem; color: var(--accent-cyan); font-weight: 500;">All 15 Items</span>
+          </div>
+          <div class="review-list" id="reviewListContainer">
+            <!-- Rendered dynamically -->
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+  </main>
+
+  <!-- 4. TEACHER / TEAM 1 MODAL DASHBOARD -->
+  <div id="teacherModal" class="modal-overlay" role="dialog" aria-modal="true">
+    <div class="modal-card">
+      <div class="modal-header">
+        <div class="modal-title-group">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#00f2fe" stroke-width="2"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+          <div>
+            <h3 class="modal-title">Team 1 Faculty & Session Dashboard</h3>
+            <span style="font-size: 0.75rem; color: var(--text-muted);">Acharya Institutes • Subject: EVS Quiz - 01</span>
+          </div>
+        </div>
+        <button id="btnCloseTeacherModal" class="btn-close-modal" aria-label="Close modal">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+        </button>
+      </div>
+
+      <div class="modal-body">
+        <!-- Statistics cards -->
+        <div class="stats-cards-grid">
+          <div class="stat-card">
+            <span class="stat-num" id="statTotalAttempts">0</span>
+            <span class="stat-label">Total Attempts</span>
+          </div>
+          <div class="stat-card">
+            <span class="stat-num" id="statClassAverage">0.0</span>
+            <span class="stat-label">Class Average (/15)</span>
+          </div>
+          <div class="stat-card">
+            <span class="stat-num" id="statHighestScore">0</span>
+            <span class="stat-label">Highest Score</span>
+          </div>
+          <div class="stat-card">
+            <span class="stat-num" id="statPassRate">0%</span>
+            <span class="stat-label">Pass Rate (&ge;8)</span>
+          </div>
+        </div>
+
+        <!-- Filter & Search Toolbar -->
+        <div class="modal-toolbar">
+          <input type="text" id="adminSearchInput" class="modal-search" placeholder="Search by name, USN, section...">
+          <div style="display: flex; gap: 0.5rem;">
+            <button id="btnExportClassCsv" class="btn-report-action btn-csv-download" style="padding: 0.55rem 1rem; font-size: 0.82rem;">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+              <span>Download Master Class CSV</span>
+            </button>
+            <button id="btnClearData" class="btn-report-action btn-restart" style="padding: 0.55rem 0.9rem; font-size: 0.82rem; color: #fb7185;">
+              <span>Clear History</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Attempts Table -->
+        <div class="table-wrapper">
+          <table class="attempts-table">
+            <thead>
+              <tr>
+                <th>#</th>
+                <th>USN</th>
+                <th>Student Name</th>
+                <th>Section</th>
+                <th>Score</th>
+                <th>Speed Pts ⚡</th>
+                <th>Avg Speed</th>
+                <th>%</th>
+                <th>Date & Time</th>
+              </tr>
+            </thead>
+            <tbody id="adminTableBody">
+              <!-- Rendered dynamically -->
+            </tbody>
+          </table>
+          <div id="adminEmptyState" class="empty-state">
+            No quiz attempts recorded in this browser session yet.
+          </div>
+        </div>
+      </div>
+
+      <div class="modal-footer">
+        <span style="font-size: 0.78rem; color: var(--text-muted);">
+          Records are stored securely in browser local storage for offline operation.
+        </span>
+        <button id="btnCloseTeacherModal2" class="btn-report-action btn-restart" style="padding: 0.5rem 1rem;">
+          Close
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast Notification Container -->
+  <div id="toastContainer" class="toast-container"></div>
+
+  <!-- Footer -->
+  <footer class="app-footer">
+    <p>&copy; 2026 Acharya Institutes • Team 1 Environmental Studies (EVS Quiz - 01) Evaluation System</p>
+  </footer>
+
+  <!-- Quiz Logic Scripts -->
+  <script src="logo-data.js"></script>
+  <script src="questions.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
