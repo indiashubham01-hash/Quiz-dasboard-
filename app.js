@@ -23,12 +23,13 @@
     questionTimeRemaining: 15,
     questionTimerInterval: null,
     lastAttemptResult: null,
-    autoSwitchTimeout: null,
+    isHostAuthenticated: sessionStorage.getItem('ACHARYA_HOST_AUTH') === 'true',
     hostPollInterval: null,
     serverCapacity: 60
   };
 
   const STORAGE_KEY = 'acharya_evs_quiz_attempts_v1';
+  const VALID_HOST_PASSWORDS = ['2024', 'team1', 'acharya', 'acharya2024', 'host', 'evs2024', 'admin'];
 
   // DOM Elements
   const DOM = {
@@ -92,6 +93,15 @@
     reviewListContainer: document.getElementById('reviewListContainer'),
     btnDownloadPdf: document.getElementById('btnDownloadPdf'),
     btnNewStudent: document.getElementById('btnNewStudent'),
+
+    // Host Password Authentication Modal
+    hostAuthModal: document.getElementById('hostAuthModal'),
+    hostAuthForm: document.getElementById('hostAuthForm'),
+    hostPasscodeInput: document.getElementById('hostPasscodeInput'),
+    hostAuthError: document.getElementById('hostAuthError'),
+    btnCloseHostAuthModal: document.getElementById('btnCloseHostAuthModal'),
+    btnCancelHostAuth: document.getElementById('btnCancelHostAuth'),
+    btnLockHostMode: document.getElementById('btnLockHostMode'),
 
     // Teacher Modal
     teacherModal: document.getElementById('teacherModal'),
@@ -702,9 +712,6 @@
       `;
       DOM.reviewListContainer.appendChild(itemDiv);
     });
-
-    // Update CSV button visibility strictly based on Host mode
-    updateHostModeUI();
   }
 
   // =========================================================================
@@ -1240,11 +1247,59 @@
     });
   }
 
-  // Teacher / Host modal toggle (Direct access, no password)
+  // =========================================================================
+  // 6. HOST AUTHENTICATION & ACCESS CONTROL
+  // =========================================================================
+  function openHostAuthModal() {
+    if (DOM.hostPasscodeInput) DOM.hostPasscodeInput.value = '';
+    if (DOM.hostAuthError) DOM.hostAuthError.style.display = 'none';
+    if (DOM.hostAuthModal) DOM.hostAuthModal.classList.add('active');
+    setTimeout(() => {
+      if (DOM.hostPasscodeInput) DOM.hostPasscodeInput.focus();
+    }, 120);
+  }
+
+  function closeHostAuthModal() {
+    if (DOM.hostAuthModal) DOM.hostAuthModal.classList.remove('active');
+    if (DOM.hostPasscodeInput) DOM.hostPasscodeInput.value = '';
+    if (DOM.hostAuthError) DOM.hostAuthError.style.display = 'none';
+  }
+
+  function handleHostAuthSubmit(e) {
+    e.preventDefault();
+    const entered = DOM.hostPasscodeInput ? DOM.hostPasscodeInput.value.trim().toLowerCase() : '';
+
+    if (VALID_HOST_PASSWORDS.includes(entered)) {
+      state.isHostAuthenticated = true;
+      sessionStorage.setItem('ACHARYA_HOST_AUTH', 'true');
+      closeHostAuthModal();
+      DOM.teacherModal.classList.add('active');
+      renderTeacherDashboard();
+      startHostPolling();
+      showToast('✓ Host authenticated. Dashboard unlocked.', 'success');
+    } else {
+      if (DOM.hostAuthError) DOM.hostAuthError.style.display = 'block';
+      if (DOM.hostPasscodeInput) DOM.hostPasscodeInput.select();
+    }
+  }
+
+  function lockHostMode() {
+    state.isHostAuthenticated = false;
+    sessionStorage.removeItem('ACHARYA_HOST_AUTH');
+    DOM.teacherModal.classList.remove('active');
+    stopHostPolling();
+    showToast('🔒 Host dashboard locked.', 'info');
+  }
+
+  // Teacher / Host modal toggle (Password Protected)
   DOM.btnTeacherDash.addEventListener('click', () => {
-    DOM.teacherModal.classList.add('active');
-    renderTeacherDashboard();
-    startHostPolling();
+    if (state.isHostAuthenticated) {
+      DOM.teacherModal.classList.add('active');
+      renderTeacherDashboard();
+      startHostPolling();
+    } else {
+      openHostAuthModal();
+    }
   });
 
   DOM.btnCloseTeacherModal.addEventListener('click', () => {
@@ -1256,6 +1311,25 @@
     DOM.teacherModal.classList.remove('active');
     stopHostPolling();
   });
+
+  if (DOM.btnLockHostMode) {
+    DOM.btnLockHostMode.addEventListener('click', lockHostMode);
+  }
+
+  if (DOM.hostAuthForm) {
+    DOM.hostAuthForm.addEventListener('submit', handleHostAuthSubmit);
+  }
+  if (DOM.btnCloseHostAuthModal) {
+    DOM.btnCloseHostAuthModal.addEventListener('click', closeHostAuthModal);
+  }
+  if (DOM.btnCancelHostAuth) {
+    DOM.btnCancelHostAuth.addEventListener('click', closeHostAuthModal);
+  }
+  if (DOM.hostAuthModal) {
+    DOM.hostAuthModal.addEventListener('click', (e) => {
+      if (e.target === DOM.hostAuthModal) closeHostAuthModal();
+    });
+  }
 
   // Copy Classroom Wi-Fi URL Button
   if (DOM.btnCopyClassUrl) {
