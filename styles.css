@@ -1387,6 +1387,60 @@ select.form-input option {
   color: var(--accent-cyan);
 }
 
+.attempts-table td.actions-cell {
+  white-space: nowrap;
+  text-align: center;
+}
+
+.btn-table-action {
+  padding: 4px 8px;
+  border-radius: 6px;
+  font-size: 0.72rem;
+  font-weight: 700;
+  cursor: pointer;
+  border: 1px solid var(--border-subtle);
+  background: rgba(255, 255, 255, 0.05);
+  color: var(--text-secondary);
+  transition: all var(--transition-fast);
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  margin: 0 2px;
+}
+
+.btn-table-action:hover {
+  transform: translateY(-1px);
+}
+
+.btn-table-csv {
+  background: rgba(16, 185, 129, 0.15);
+  border-color: rgba(16, 185, 129, 0.4);
+  color: #34d399;
+}
+
+.btn-table-csv:hover {
+  background: rgba(16, 185, 129, 0.28);
+  box-shadow: 0 0 10px rgba(16, 185, 129, 0.25);
+}
+
+.btn-table-pdf {
+  background: rgba(244, 63, 94, 0.15);
+  border-color: rgba(244, 63, 94, 0.4);
+  color: #fb7185;
+}
+
+.btn-table-pdf:hover {
+  background: rgba(244, 63, 94, 0.28);
+  box-shadow: 0 0 10px rgba(244, 63, 94, 0.25);
+}
+
+.btn-teacher-toggle.host-unlocked {
+  background: linear-gradient(135deg, rgba(245, 158, 11, 0.18) 0%, rgba(234, 88, 12, 0.18) 100%);
+  border-color: rgba(245, 158, 11, 0.55);
+  color: #fbbf24;
+  box-shadow: 0 0 16px rgba(245, 158, 11, 0.25);
+}
+
 .empty-state {
   text-align: center;
   padding: 3rem 1rem;

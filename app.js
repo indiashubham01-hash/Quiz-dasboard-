@@ -23,15 +23,18 @@
     questionTimeRemaining: 15,
     questionTimerInterval: null,
     lastAttemptResult: null,
-    autoSwitchTimeout: null
+    autoSwitchTimeout: null,
+    isHostAuthenticated: sessionStorage.getItem('ACHARYA_HOST_AUTH') === 'true'
   };
 
   const STORAGE_KEY = 'acharya_evs_quiz_attempts_v1';
+  const VALID_HOST_PASSCODES = ['2024', 'team1', 'acharya', 'acharya2024', 'host'];
 
   // DOM Elements
   const DOM = {
     headerLogo: document.getElementById('headerLogo'),
     btnTeacherDash: document.getElementById('btnTeacherDash'),
+    hostBtnText: document.getElementById('hostBtnText'),
     
     // Views
     loginView: document.getElementById('loginView'),
@@ -90,6 +93,15 @@
     btnDownloadPdf: document.getElementById('btnDownloadPdf'),
     btnDownloadCsv: document.getElementById('btnDownloadCsv'),
     btnNewStudent: document.getElementById('btnNewStudent'),
+
+    // Host Authentication Modal
+    hostAuthModal: document.getElementById('hostAuthModal'),
+    hostAuthForm: document.getElementById('hostAuthForm'),
+    hostPasscodeInput: document.getElementById('hostPasscodeInput'),
+    hostAuthError: document.getElementById('hostAuthError'),
+    btnCloseHostAuthModal: document.getElementById('btnCloseHostAuthModal'),
+    btnCancelHostAuth: document.getElementById('btnCancelHostAuth'),
+    btnLockHostMode: document.getElementById('btnLockHostMode'),
 
     // Teacher Modal
     teacherModal: document.getElementById('teacherModal'),
@@ -692,13 +704,22 @@
       `;
       DOM.reviewListContainer.appendChild(itemDiv);
     });
+
+    // Update CSV button visibility strictly based on Host mode
+    updateHostModeUI();
   }
 
   // =========================================================================
-  // 5. CSV REPORT GENERATION (INDIVIDUAL & CLASS MASTER)
+  // 5. CSV REPORT GENERATION (INDIVIDUAL & CLASS MASTER - HOST ONLY)
   // =========================================================================
   function exportIndividualCsv(record) {
     if (!record) return;
+
+    if (!state.isHostAuthenticated) {
+      showToast('🔒 Host authorization required to download CSV reports.', 'warn');
+      openHostAuthModal(() => exportIndividualCsv(record));
+      return;
+    }
 
     // Build standard CSV
     const rows = [
@@ -738,10 +759,16 @@
 
     const csvContent = '\uFEFF' + rows.map(e => e.join(',')).join('\n');
     downloadBlob(csvContent, `Acharya_EVS_Quiz01_${record.usn}.csv`, 'text/csv;charset=utf-8;');
-    showToast('Student CSV Report downloaded successfully.', 'success');
+    showToast(`Student CSV Report exported for ${record.usn}.`, 'success');
   }
 
   function exportClassMasterCsv() {
+    if (!state.isHostAuthenticated) {
+      showToast('🔒 Host authorization required to export Master Class CSV.', 'warn');
+      openHostAuthModal(() => exportClassMasterCsv());
+      return;
+    }
+
     const list = getStoredAttempts();
     if (list.length === 0) {
       showToast('No class attempts available to export.', 'warn');
@@ -1045,6 +1072,73 @@
   }
 
   // =========================================================================
+  // 6. HOST AUTHENTICATION & ACCESS CONTROL
+  // =========================================================================
+  let pendingHostAction = null;
+
+  function updateHostModeUI() {
+    if (state.isHostAuthenticated) {
+      if (DOM.btnDownloadCsv) DOM.btnDownloadCsv.style.display = 'inline-flex';
+      if (DOM.btnTeacherDash) DOM.btnTeacherDash.classList.add('host-unlocked');
+      if (DOM.hostBtnText) DOM.hostBtnText.textContent = '👑 Host Active';
+    } else {
+      if (DOM.btnDownloadCsv) DOM.btnDownloadCsv.style.display = 'none';
+      if (DOM.btnTeacherDash) DOM.btnTeacherDash.classList.remove('host-unlocked');
+      if (DOM.hostBtnText) DOM.hostBtnText.textContent = 'Host Portal';
+    }
+  }
+
+  function openHostAuthModal(callback) {
+    pendingHostAction = typeof callback === 'function' ? callback : null;
+    DOM.hostPasscodeInput.value = '';
+    DOM.hostAuthError.style.display = 'none';
+    DOM.hostAuthModal.classList.add('active');
+    setTimeout(() => {
+      DOM.hostPasscodeInput.focus();
+    }, 120);
+  }
+
+  function closeHostAuthModal() {
+    DOM.hostAuthModal.classList.remove('active');
+    DOM.hostPasscodeInput.value = '';
+    DOM.hostAuthError.style.display = 'none';
+    pendingHostAction = null;
+  }
+
+  function handleHostAuthSubmit(e) {
+    e.preventDefault();
+    const entered = DOM.hostPasscodeInput.value.trim().toLowerCase();
+
+    if (VALID_HOST_PASSCODES.includes(entered)) {
+      state.isHostAuthenticated = true;
+      sessionStorage.setItem('ACHARYA_HOST_AUTH', 'true');
+      closeHostAuthModal();
+      updateHostModeUI();
+      showToast('✓ Host verified. CSV datasets & Class Reports unlocked.', 'success');
+
+      if (pendingHostAction) {
+        const action = pendingHostAction;
+        pendingHostAction = null;
+        action();
+      } else {
+        DOM.teacherModal.classList.add('active');
+        renderTeacherDashboard();
+      }
+    } else {
+      DOM.hostAuthError.style.display = 'block';
+      DOM.hostPasscodeInput.select();
+    }
+  }
+
+  function lockHostMode() {
+    state.isHostAuthenticated = false;
+    sessionStorage.removeItem('ACHARYA_HOST_AUTH');
+    DOM.teacherModal.classList.remove('active');
+    updateHostModeUI();
+    showToast('🔒 Host mode locked. Device secured for students.', 'info');
+  }
+
+  // =========================================================================
   // 7. TEACHER / TEAM 1 MODAL DASHBOARD LOGIC
   // =========================================================================
   function renderTeacherDashboard() {
@@ -1103,7 +1197,7 @@
     });
 
     if (filtered.length === 0) {
-      DOM.adminTableBody.innerHTML = `<tr><td colspan="9" style="text-align:center; padding: 2rem; color: var(--text-muted);">No matching students found.</td></tr>`;
+      DOM.adminTableBody.innerHTML = `<tr><td colspan="10" style="text-align:center; padding: 2rem; color: var(--text-muted);">No matching students found.</td></tr>`;
       return;
     }
 
@@ -1119,15 +1213,48 @@
         <td style="font-family: var(--font-mono);">${item.avgSpeed || '0.0'}s</td>
         <td style="font-family: var(--font-mono);">${item.percentage}%</td>
         <td style="font-size: 0.75rem; color: var(--text-muted);">${item.completedAt}</td>
+        <td class="actions-cell">
+          <button class="btn-table-action btn-table-csv" data-idx="${index}" title="Download Candidate CSV (Host Only)">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+            <span>CSV</span>
+          </button>
+          <button class="btn-table-action btn-table-pdf" data-idx="${index}" title="Download Candidate PDF Scorecard">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+            <span>PDF</span>
+          </button>
+        </td>
       `;
+
+      const btnCsv = tr.querySelector('.btn-table-csv');
+      const btnPdf = tr.querySelector('.btn-table-pdf');
+      if (btnCsv) {
+        btnCsv.addEventListener('click', (ev) => {
+          ev.stopPropagation();
+          exportIndividualCsv(item);
+        });
+      }
+      if (btnPdf) {
+        btnPdf.addEventListener('click', (ev) => {
+          ev.stopPropagation();
+          generateStudentPdf(item);
+        });
+      }
+
       DOM.adminTableBody.appendChild(tr);
     });
   }
 
-  // Teacher modal toggle
+  // Teacher / Host modal toggle
   DOM.btnTeacherDash.addEventListener('click', () => {
-    DOM.teacherModal.classList.add('active');
-    renderTeacherDashboard();
+    if (state.isHostAuthenticated) {
+      DOM.teacherModal.classList.add('active');
+      renderTeacherDashboard();
+    } else {
+      openHostAuthModal(() => {
+        DOM.teacherModal.classList.add('active');
+        renderTeacherDashboard();
+      });
+    }
   });
 
   DOM.btnCloseTeacherModal.addEventListener('click', () => {
@@ -1136,6 +1263,18 @@
 
   DOM.btnCloseTeacherModal2.addEventListener('click', () => {
     DOM.teacherModal.classList.remove('active');
+  });
+
+  if (DOM.btnLockHostMode) {
+    DOM.btnLockHostMode.addEventListener('click', lockHostMode);
+  }
+
+  // Host Auth Form & Modal Listeners
+  DOM.hostAuthForm.addEventListener('submit', handleHostAuthSubmit);
+  DOM.btnCloseHostAuthModal.addEventListener('click', closeHostAuthModal);
+  DOM.btnCancelHostAuth.addEventListener('click', closeHostAuthModal);
+  DOM.hostAuthModal.addEventListener('click', (e) => {
+    if (e.target === DOM.hostAuthModal) closeHostAuthModal();
   });
 
   DOM.adminSearchInput.addEventListener('input', filterAdminTable);
@@ -1181,5 +1320,5 @@
 
   // Init
   preloadLogoBase64();
-
+  updateHostModeUI();
 })();

@@ -48,10 +48,10 @@ This web portal is designed for conducting live interactive classroom quiz sessi
    - Topic-wise competency breakdown bars.
    - Question-by-question review displaying chosen answer, correct answer, time taken, speed points, result, and in-depth explanation from the PDF.
 
-6. **Downloadable PDF & CSV Reports**:
-   - **Download PDF Report**: Generates an official Acharya Scorecard with the Acharya logo, candidate particulars, speed analytics, topic table, and full 15-question review.
-   - **Download CSV Report**: Generates an individual student attempt CSV with response times and speed points.
-   - **Team 1 Faculty Dashboard**: Click **"Class Report"** in the top navigation to view class statistics, sort by speed points, and **Download Master Class CSV** containing all student attempts with individual question timestamps.
+6. **Reports & Host-Only CSV Security**:
+   - **Download PDF Scorecard**: Available to all candidates upon quiz completion as their official verified scorecard.
+   - **Host-Only CSV Protection**: CSV datasets (individual student exports and the Master Class CSV) are strictly restricted to the session host/faculty. Regular students cannot see or download CSV files.
+   - **Host & Faculty Portal (Passcode Protected)**: Click **"Host Portal"** in the top navigation to unlock host access using the Host Passcode (e.g. `2024` or `team1`). From here, the host can download the Master Class CSV, export individual candidate CSVs, review attempt logs, and lock the session before handing devices back to students.
 
 7. **📱 Fully Responsive Design**:
    - Optimized for mobile smartphones, tablets, laptops, and large interactive monitors.
