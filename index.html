@@ -46,8 +46,8 @@
           <span class="dot"></span>
           <span>Team 1</span>
         </div>
-        <button id="btnTeacherDash" class="btn-teacher-toggle" title="Instructor / Host Dashboard (Passcode Protected)">
-          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+        <button id="btnTeacherDash" class="btn-teacher-toggle" title="Instructor & Host Portal">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
           <span id="hostBtnText">Host Portal</span>
         </button>
       </div>
@@ -331,17 +331,11 @@
           </div>
         </div>
 
-        <!-- Action Buttons: Download PDF (Students), Download CSV (Host Only), Restart -->
+        <!-- Action Buttons: Download PDF (Students) and Next Candidate Login -->
         <div class="results-actions-grid">
           <button id="btnDownloadPdf" class="btn-report-action btn-pdf-download">
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
             <span>Download PDF Scorecard</span>
-          </button>
-
-          <!-- CSV report is restricted exclusively to Host user -->
-          <button id="btnDownloadCsv" class="btn-report-action btn-csv-download" style="display: none;">
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
-            <span>👑 Download CSV (Host Only)</span>
           </button>
 
           <button id="btnNewStudent" class="btn-report-action btn-restart">
@@ -377,76 +371,20 @@
 
   </main>
 
-  <!-- 4. HOST AUTHENTICATION PASSCODE MODAL -->
-  <div id="hostAuthModal" class="modal-overlay" role="dialog" aria-modal="true">
-    <div class="modal-card" style="max-width: 440px;">
-      <div class="modal-header">
-        <div class="modal-title-group">
-          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#fbbf24" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
-          <div>
-            <h3 class="modal-title" style="color: #fbbf24;">Host & Faculty Access</h3>
-            <span style="font-size: 0.75rem; color: var(--text-muted);">Protected Master Data & CSV Export Portal</span>
-          </div>
-        </div>
-        <button id="btnCloseHostAuthModal" class="btn-close-modal" aria-label="Close modal">
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
-        </button>
-      </div>
-
-      <form id="hostAuthForm" class="modal-body" style="padding-top: 1rem;" novalidate>
-        <p style="font-size: 0.86rem; color: var(--text-secondary); margin-bottom: 1.25rem; line-height: 1.5;">
-          CSV datasets, full cohort analytics, and raw response sheets are restricted exclusively to the session host/faculty. Please enter your Host Passcode to unlock.
-        </p>
-
-        <div class="form-group full-width">
-          <label for="hostPasscodeInput" class="form-label">
-            <span>Host Passcode</span>
-            <span class="required">*</span>
-          </label>
-          <div class="input-wrapper">
-            <span class="input-icon">
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
-            </span>
-            <input type="password" id="hostPasscodeInput" class="form-input" placeholder="Enter Host PIN / Passcode" required autocomplete="current-password">
-          </div>
-          <span class="input-hint">Default Passcode: <strong>2024</strong> or <strong>team1</strong></span>
-        </div>
-
-        <div id="hostAuthError" style="display: none; color: #fb7185; font-size: 0.82rem; margin-top: 0.5rem; font-weight: 600;">
-          ⚠ Incorrect Host Passcode. Access denied to non-host users.
-        </div>
-
-        <div style="display: flex; gap: 0.75rem; margin-top: 1.5rem;">
-          <button type="button" id="btnCancelHostAuth" class="btn-report-action btn-restart" style="flex: 1; padding: 0.75rem;">
-            Cancel
-          </button>
-          <button type="submit" class="btn-report-action btn-primary" style="flex: 1.5; padding: 0.75rem; background: linear-gradient(135deg, #f59e0b 0%, #ea580c 100%); color: #ffffff; border: none; font-weight: 700; box-shadow: 0 4px 15px rgba(245, 158, 11, 0.35);">
-            Verify & Unlock
-          </button>
-        </div>
-      </form>
-    </div>
-  </div>
-
-  <!-- 5. TEACHER / HOST MASTER DASHBOARD -->
+  <!-- 4. TEACHER / HOST MASTER DASHBOARD -->
   <div id="teacherModal" class="modal-overlay" role="dialog" aria-modal="true">
     <div class="modal-card">
       <div class="modal-header">
         <div class="modal-title-group">
-          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#fbbf24" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#00f2fe" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
           <div>
             <h3 class="modal-title">Team 1 Faculty & Host Dashboard</h3>
             <span style="font-size: 0.75rem; color: var(--text-muted);">Acharya Institutes • Section D Master Data & CSV Export Portal</span>
           </div>
         </div>
-        <div style="display: flex; align-items: center; gap: 0.6rem;">
-          <button id="btnLockHostMode" class="btn-report-action btn-restart" style="padding: 0.45rem 0.85rem; font-size: 0.78rem; border-color: rgba(245, 158, 11, 0.4); color: #fbbf24;" title="Lock Host Mode when handing device to students">
-            🔒 Lock Host Mode
-          </button>
-          <button id="btnCloseTeacherModal" class="btn-close-modal" aria-label="Close modal">
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
-          </button>
-        </div>
+        <button id="btnCloseTeacherModal" class="btn-close-modal" aria-label="Close modal">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+        </button>
       </div>
 
       <div class="modal-body">

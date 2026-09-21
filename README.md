@@ -51,7 +51,7 @@ This web portal is designed for conducting live interactive classroom quiz sessi
 6. **Reports & Host-Only CSV Security**:
    - **Download PDF Scorecard**: Available to all candidates upon quiz completion as their official verified scorecard.
    - **Host-Only CSV Protection**: CSV datasets (individual student exports and the Master Class CSV) are strictly restricted to the session host/faculty. Regular students cannot see or download CSV files.
-   - **Host & Faculty Portal (Passcode Protected)**: Click **"Host Portal"** in the top navigation to unlock host access using the Host Passcode (e.g. `2024` or `team1`). From here, the host can download the Master Class CSV, export individual candidate CSVs, review attempt logs, and lock the session before handing devices back to students.
+    - **Host & Faculty Portal (Direct Access)**: Click **"Host Portal"** in the top navigation to view the live dashboard directly without any password prompts. From here, the host can download the Master Class CSV, export individual candidate CSVs, and review live attempt logs.
 
 7. **⚡ Multi-Device 60-Member Live Sync (Section D Cohort)**:
    - Engineered to run **60 students simultaneously** on their mobile smartphones in the classroom.
@@ -82,7 +82,7 @@ To conduct a live assessment session for all 60 students in Section D:
    Classroom Wi-Fi:   http://192.168.X.Y:8085 (or http://10.X.X.X:8085)
    ```
 3. Share the **Classroom Wi-Fi URL** on the classroom screen/board or have students connect to the same Wi-Fi network and open the link on their mobile smartphones.
-4. As students finish within 15s per question, open the **Host Portal** (Passcode: `2024` or `team1`) to watch the live counter update to `60 / 60`.
+4. As students finish within 15s per question, open the **Host Portal** to watch the live counter update to `60 / 60`.
 5. Once completed, click **"Download Master Class CSV (Host)"** to export the entire Section D spreadsheet!
 
 ---
