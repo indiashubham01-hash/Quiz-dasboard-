@@ -19,9 +19,15 @@
   <!-- Core Stylesheet -->
   <link rel="stylesheet" href="styles.css?v=2">
 
-  <!-- PDF Generation Libraries -->
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js"></script>
+  <!-- PDF Generation Libraries (100% Offline with CDN Fallback) -->
+  <script src="assets/jspdf.umd.min.js"></script>
+  <script src="assets/jspdf.plugin.autotable.min.js"></script>
+  <script>
+    if (!window.jspdf) {
+      document.write('<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"><\/script>');
+      document.write('<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js"><\/script>');
+    }
+  </script>
 </head>
 <body>
 
@@ -507,6 +513,10 @@
             <button id="btnExportClassCsv" class="btn-report-action btn-csv-download" style="padding: 0.55rem 1rem; font-size: 0.82rem;">
               <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
               <span>Download Master Class CSV (Host)</span>
+            </button>
+            <button id="btnExportOfflineJson" class="btn-report-action btn-pdf-download" style="padding: 0.55rem 1rem; font-size: 0.82rem; background: rgba(59, 130, 246, 0.18); border-color: rgba(59, 130, 246, 0.45); color: #60a5fa;" title="Export complete offline database (JSON)">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
+              <span>Export Offline JSON</span>
             </button>
             <button id="btnClearData" class="btn-report-action btn-restart" style="padding: 0.55rem 0.9rem; font-size: 0.82rem; color: #fb7185;">
               <span>Clear History</span>

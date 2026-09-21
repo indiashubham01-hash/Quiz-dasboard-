@@ -59,7 +59,10 @@ function getStoredAttempts() {
 
 function saveAttemptsList(list) {
   try {
-    fs.writeFileSync(DATA_FILE, JSON.stringify(list, null, 2), 'utf8');
+    const dataStr = JSON.stringify(list, null, 2);
+    fs.writeFileSync(DATA_FILE, dataStr, 'utf8');
+    const backupFile = path.join(__dirname, 'attempts_backup.json');
+    fs.writeFileSync(backupFile, dataStr, 'utf8');
     return true;
   } catch (err) {
     console.error('[Storage Error] Failed to write attempts.json:', err.message);

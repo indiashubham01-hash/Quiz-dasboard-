@@ -29,6 +29,7 @@
   };
 
   const STORAGE_KEY = 'acharya_evs_quiz_attempts_v1';
+  const OFFLINE_QUEUE_KEY = 'acharya_evs_quiz_sync_queue_v1';
   const VALID_HOST_PASSWORDS = ['2024', 'team1', 'acharya', 'acharya2024', 'host', 'evs2024', 'admin'];
 
   // DOM Elements
@@ -115,9 +116,11 @@
     statHighestScore: document.getElementById('statHighestScore'),
     statPassRate: document.getElementById('statPassRate'),
     btnExportClassCsv: document.getElementById('btnExportClassCsv'),
+    btnExportOfflineJson: document.getElementById('btnExportOfflineJson'),
     btnClearData: document.getElementById('btnClearData'),
 
     // Cohort Tracker & Live Network Banner
+    cohortLiveStatus: document.getElementById('cohortLiveStatus'),
     cohortProgressFill: document.getElementById('cohortProgressFill'),
     cohortProgressText: document.getElementById('cohortProgressText'),
     cohortRemainingText: document.getElementById('cohortRemainingText'),
@@ -180,7 +183,7 @@
     window.scrollTo({ top: 0, behavior: 'smooth' });
   }
 
-  // Local Storage Helpers
+  // Local & Offline Storage Helpers
   function getStoredAttempts() {
     try {
       const data = localStorage.getItem(STORAGE_KEY);
@@ -191,11 +194,67 @@
     }
   }
 
+  function mergeAttempts(localList, serverList) {
+    const map = new Map();
+    // Add local attempts first
+    (localList || []).forEach(item => {
+      if (item && (item.id || item.usn)) {
+        const key = item.id || (item.usn + '_' + (item.timestamp || item.completedAt || ''));
+        map.set(key, item);
+      }
+    });
+    // Merge or update with server attempts
+    (serverList || []).forEach(item => {
+      if (item && (item.id || item.usn)) {
+        const key = item.id || (item.usn + '_' + (item.timestamp || item.completedAt || ''));
+        map.set(key, item);
+      }
+    });
+    return Array.from(map.values()).sort((a, b) => (b.timestamp || 0) - (a.timestamp || 0));
+  }
+
+  function getSyncQueue() {
+    try {
+      const data = localStorage.getItem(OFFLINE_QUEUE_KEY);
+      return data ? JSON.parse(data) : [];
+    } catch (e) {
+      return [];
+    }
+  }
+
+  function addToSyncQueue(attempt) {
+    try {
+      const queue = getSyncQueue();
+      const exists = queue.some(item => (item.id && item.id === attempt.id) || (item.usn === attempt.usn && item.timestamp === attempt.timestamp));
+      if (!exists) {
+        queue.push(attempt);
+        localStorage.setItem(OFFLINE_QUEUE_KEY, JSON.stringify(queue));
+      }
+    } catch (e) {
+      console.error('Failed saving to sync queue', e);
+    }
+  }
+
+  function removeSyncQueueItem(record) {
+    try {
+      const queue = getSyncQueue();
+      const updated = queue.filter(item => !((item.id && item.id === record.id) || (item.usn === record.usn && item.timestamp === record.timestamp)));
+      localStorage.setItem(OFFLINE_QUEUE_KEY, JSON.stringify(updated));
+    } catch (e) {}
+  }
+
   function saveAttempt(attempt) {
     try {
       const list = getStoredAttempts();
-      list.unshift(attempt);
+      const existingIdx = list.findIndex(item => (item.id && item.id === attempt.id) || (item.usn === attempt.usn && item.timestamp === attempt.timestamp));
+      if (existingIdx >= 0) {
+        list[existingIdx] = attempt;
+      } else {
+        list.unshift(attempt);
+      }
       localStorage.setItem(STORAGE_KEY, JSON.stringify(list));
+      // Reliable backup in sync queue
+      addToSyncQueue(attempt);
     } catch (e) {
       console.error('Failed saving to localStorage', e);
     }
@@ -1067,9 +1126,10 @@
 
 
   // =========================================================================
-  // 6.5 MULTI-DEVICE 60-STUDENT LIVE NETWORK SYNC
+  // 6.5 MULTI-DEVICE 60-STUDENT LIVE NETWORK SYNC & OFFLINE QUEUE
   // =========================================================================
   async function syncAttemptToServer(record) {
+    if (!record) return;
     try {
       const res = await fetch('/api/submit', {
         method: 'POST',
@@ -1078,11 +1138,44 @@
       });
       if (res.ok) {
         const data = await res.json();
-        console.log('[Live Sync Successful]', data);
+        removeSyncQueueItem(record);
+        if (DOM.cohortLiveStatus) {
+          DOM.cohortLiveStatus.textContent = 'Live Server Sync Active';
+          DOM.cohortLiveStatus.style.color = '#34d399';
+        }
         showToast(`✓ Submissions synced live to Host (${data.totalSubmitted}/60 Section D students)`, 'info');
+      } else {
+        markOfflineMode('Server returned non-200 status');
       }
     } catch (err) {
-      console.warn('[Sync Notice] Local offline mode active.', err.message);
+      markOfflineMode(err.message);
+    }
+  }
+
+  async function flushSyncQueue() {
+    const queue = getSyncQueue();
+    if (!queue || queue.length === 0) return;
+
+    for (const item of [...queue]) {
+      try {
+        const res = await fetch('/api/submit', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(item)
+        });
+        if (res.ok) {
+          removeSyncQueueItem(item);
+        }
+      } catch (err) {
+        break; // Still offline, retry on next cycle
+      }
+    }
+  }
+
+  function markOfflineMode(reason) {
+    if (DOM.cohortLiveStatus) {
+      DOM.cohortLiveStatus.textContent = 'Offline Mode (Data Saved Locally)';
+      DOM.cohortLiveStatus.style.color = '#fbbf24';
     }
   }
 
@@ -1106,9 +1199,13 @@
   }
 
   async function fetchLiveServerAttempts() {
-    let list = getStoredAttempts();
+    let localList = getStoredAttempts();
+    let mergedList = localList;
 
     try {
+      // Flush any pending queue items first
+      await flushSyncQueue();
+
       // 1. Query server network & cohort capacity status
       const infoRes = await fetch('/api/info');
       if (infoRes.ok) {
@@ -1117,6 +1214,10 @@
         if (DOM.cohortProgressFill) DOM.cohortProgressFill.style.width = `${info.turnoutPercentage}%`;
         if (DOM.cohortProgressText) DOM.cohortProgressText.textContent = `${info.totalAttempts} / ${info.capacity} Submitted (${info.turnoutPercentage}%)`;
         if (DOM.cohortRemainingText) DOM.cohortRemainingText.textContent = `${info.remaining} Remaining to Submit`;
+        if (DOM.cohortLiveStatus) {
+          DOM.cohortLiveStatus.textContent = 'Live Server Sync Active';
+          DOM.cohortLiveStatus.style.color = '#34d399';
+        }
       }
 
       // 2. Fetch synchronized attempts across all 60 devices
@@ -1124,15 +1225,29 @@
       if (attemptsRes.ok) {
         const serverAttempts = await attemptsRes.json();
         if (Array.isArray(serverAttempts)) {
-          list = serverAttempts;
-          localStorage.setItem(STORAGE_KEY, JSON.stringify(serverAttempts));
+          mergedList = mergeAttempts(localList, serverAttempts);
+          localStorage.setItem(STORAGE_KEY, JSON.stringify(mergedList));
         }
       }
     } catch (err) {
-      if (DOM.classroomWifiUrl) DOM.classroomWifiUrl.textContent = window.location.origin;
+      markOfflineMode(err.message);
+      if (DOM.classroomWifiUrl && !DOM.classroomWifiUrl.textContent.startsWith('http')) {
+        DOM.classroomWifiUrl.textContent = window.location.origin || 'Offline (Local Device)';
+      }
     }
 
-    renderTeacherDashboardStats(list);
+    renderTeacherDashboardStats(mergedList);
+  }
+
+  function exportOfflineJson() {
+    const list = getStoredAttempts();
+    if (!list || list.length === 0) {
+      showToast('No offline quiz records available to export.', 'warn');
+      return;
+    }
+    const jsonStr = JSON.stringify(list, null, 2);
+    downloadBlob(jsonStr, `Acharya_EVS_Quiz01_Attempts_Backup_${new Date().toISOString().slice(0, 10)}.json`, 'application/json;charset=utf-8;');
+    showToast(`✓ Exported ${list.length} offline student attempts to JSON backup.`, 'success');
   }
 
   function renderTeacherDashboardStats(list) {
@@ -1348,6 +1463,18 @@
   DOM.adminSearchInput.addEventListener('input', filterAdminTable);
 
   DOM.btnExportClassCsv.addEventListener('click', exportClassMasterCsv);
+  if (DOM.btnExportOfflineJson) {
+    DOM.btnExportOfflineJson.addEventListener('click', exportOfflineJson);
+  }
+
+  window.addEventListener('online', () => {
+    flushSyncQueue();
+    fetchLiveServerAttempts();
+    showToast('🌐 Network reconnected. Syncing offline data...', 'info');
+  });
+
+  // Background queue sync check every 15s
+  setInterval(flushSyncQueue, 15000);
 
   DOM.btnClearData.addEventListener('click', async () => {
     if (confirm('Are you sure you want to clear all student quiz records from this device and host server?')) {

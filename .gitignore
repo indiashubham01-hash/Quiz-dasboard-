@@ -1,6 +1,3 @@
-# Runtime attempts database (live quiz responses)
-attempts.json
-
 # Environment & IDE
 .vscode/
 .idea/
