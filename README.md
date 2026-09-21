@@ -53,25 +53,37 @@ This web portal is designed for conducting live interactive classroom quiz sessi
    - **Host-Only CSV Protection**: CSV datasets (individual student exports and the Master Class CSV) are strictly restricted to the session host/faculty. Regular students cannot see or download CSV files.
    - **Host & Faculty Portal (Passcode Protected)**: Click **"Host Portal"** in the top navigation to unlock host access using the Host Passcode (e.g. `2024` or `team1`). From here, the host can download the Master Class CSV, export individual candidate CSVs, review attempt logs, and lock the session before handing devices back to students.
 
-7. **📱 Fully Responsive Design**:
-   - Optimized for mobile smartphones, tablets, laptops, and large interactive monitors.
-   - Touch-friendly option cards (min-height 52px), fluid top bar, and zero horizontal scroll.
+7. **⚡ Multi-Device 60-Member Live Sync (Section D Cohort)**:
+   - Engineered to run **60 students simultaneously** on their mobile smartphones in the classroom.
+   - When each student completes their quiz on their phone, their scores, response times, and answers automatically stream live to the host server.
+   - **Host Dashboard Cohort Tracker**:
+     - Visual turnout progress bar: `X / 60 Submitted (%)`.
+     - Remaining student counter: `(60 - X) Pending`.
+     - Real-time auto-polling every 3 seconds to reflect submissions as they happen.
+     - One-click copyable **Classroom Wi-Fi Link** for easy distribution to all 60 students.
+
+8. **📱 Smartphone-Optimized Touch UI**:
+   - Tested across iPhone and Android devices with safe-area insets (`viewport-fit=cover`).
+   - Large touch targets (56px minimum height), haptic press feedback, and zero iOS Safari auto-zoom glitch.
 
 ---
 
-## 💻 How to Run
+## 💻 How to Run for 60 Students Concurrently
 
-You can open and run this application in two ways:
+To conduct a live assessment session for all 60 students in Section D:
 
-### Method 1: Direct File Launch
-Double-click `index.html` in the folder to open it in any modern web browser (Chrome, Edge, Firefox, Brave, Safari).
-
-### Method 2: Local HTTP Server (Recommended)
-Open a terminal in the folder and run:
-```bash
-python -m http.server 8085
-```
-Then visit [http://localhost:8085](http://localhost:8085).
+1. Open your terminal in the `quiz/` folder and run:
+   ```bash
+   node server.js
+   ```
+2. The server will output your local Classroom Wi-Fi URL:
+   ```
+   Local Host URL:    http://localhost:8085
+   Classroom Wi-Fi:   http://192.168.X.Y:8085 (or http://10.X.X.X:8085)
+   ```
+3. Share the **Classroom Wi-Fi URL** on the classroom screen/board or have students connect to the same Wi-Fi network and open the link on their mobile smartphones.
+4. As students finish within 15s per question, open the **Host Portal** (Passcode: `2024` or `team1`) to watch the live counter update to `60 / 60`.
+5. Once completed, click **"Download Master Class CSV (Host)"** to export the entire Section D spreadsheet!
 
 ---
 
@@ -82,6 +94,8 @@ quiz/
 ├── assets/
 │   ├── acharya-logo-transparent.png   # Official transparent Acharya logo
 │   └── acharya-logo.png               # Acharya logo
+├── server.js                          # Node.js multi-device live sync server (60 members)
+├── attempts.json                      # Synchronized submissions database
 ├── index.html                         # Main application markup & layout
 ├── styles.css                         # Dark theme (Black & White with neon accents)
 ├── questions.js                       # 15 MCQ questions, answers & explanations

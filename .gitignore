@@ -1,0 +1,9 @@
+# Runtime attempts database (live quiz responses)
+attempts.json
+
+# Environment & IDE
+.vscode/
+.idea/
+*.log
+.DS_Store
+Thumbs.db

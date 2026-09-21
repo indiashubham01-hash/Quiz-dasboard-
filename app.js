@@ -24,7 +24,9 @@
     questionTimerInterval: null,
     lastAttemptResult: null,
     autoSwitchTimeout: null,
-    isHostAuthenticated: sessionStorage.getItem('ACHARYA_HOST_AUTH') === 'true'
+    isHostAuthenticated: sessionStorage.getItem('ACHARYA_HOST_AUTH') === 'true',
+    hostPollInterval: null,
+    serverCapacity: 60
   };
 
   const STORAGE_KEY = 'acharya_evs_quiz_attempts_v1';
@@ -116,6 +118,13 @@
     statPassRate: document.getElementById('statPassRate'),
     btnExportClassCsv: document.getElementById('btnExportClassCsv'),
     btnClearData: document.getElementById('btnClearData'),
+
+    // Cohort Tracker & Live Network Banner
+    cohortProgressFill: document.getElementById('cohortProgressFill'),
+    cohortProgressText: document.getElementById('cohortProgressText'),
+    cohortRemainingText: document.getElementById('cohortRemainingText'),
+    classroomWifiUrl: document.getElementById('classroomWifiUrl'),
+    btnCopyClassUrl: document.getElementById('btnCopyClassUrl'),
 
     toastContainer: document.getElementById('toastContainer')
   };
@@ -613,6 +622,7 @@
 
     state.lastAttemptResult = attemptRecord;
     saveAttempt(attemptRecord);
+    syncAttemptToServer(attemptRecord);
 
     // Populate Results Screen
     displayResults(attemptRecord);
@@ -1139,14 +1149,89 @@
   }
 
   // =========================================================================
-  // 7. TEACHER / TEAM 1 MODAL DASHBOARD LOGIC
+  // 6.5 MULTI-DEVICE 60-STUDENT LIVE NETWORK SYNC
   // =========================================================================
-  function renderTeacherDashboard() {
-    const list = getStoredAttempts();
+  async function syncAttemptToServer(record) {
+    try {
+      const res = await fetch('/api/submit', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(record)
+      });
+      if (res.ok) {
+        const data = await res.json();
+        console.log('[Live Sync Successful]', data);
+        showToast(`✓ Submissions synced live to Host (${data.totalSubmitted}/60 Section D students)`, 'info');
+      }
+    } catch (err) {
+      console.warn('[Sync Notice] Local offline mode active.', err.message);
+    }
+  }
 
-    // Statistics
+  function startHostPolling() {
+    stopHostPolling();
+    state.hostPollInterval = setInterval(fetchLiveServerAttempts, 3000);
+  }
+
+  function stopHostPolling() {
+    if (state.hostPollInterval) {
+      clearInterval(state.hostPollInterval);
+      state.hostPollInterval = null;
+    }
+  }
+
+  // =========================================================================
+  // 7. TEACHER / HOST MASTER DASHBOARD & 60-MEMBER COHORT TRACKER
+  // =========================================================================
+  async function renderTeacherDashboard() {
+    await fetchLiveServerAttempts();
+  }
+
+  async function fetchLiveServerAttempts() {
+    let list = getStoredAttempts();
+
+    try {
+      // 1. Query server network & cohort capacity status
+      const infoRes = await fetch('/api/info');
+      if (infoRes.ok) {
+        const info = await infoRes.json();
+        if (DOM.classroomWifiUrl) DOM.classroomWifiUrl.textContent = info.joinUrl;
+        if (DOM.cohortProgressFill) DOM.cohortProgressFill.style.width = `${info.turnoutPercentage}%`;
+        if (DOM.cohortProgressText) DOM.cohortProgressText.textContent = `${info.totalAttempts} / ${info.capacity} Submitted (${info.turnoutPercentage}%)`;
+        if (DOM.cohortRemainingText) DOM.cohortRemainingText.textContent = `${info.remaining} Remaining to Submit`;
+      }
+
+      // 2. Fetch synchronized attempts across all 60 devices
+      const attemptsRes = await fetch('/api/attempts');
+      if (attemptsRes.ok) {
+        const serverAttempts = await attemptsRes.json();
+        if (Array.isArray(serverAttempts)) {
+          list = serverAttempts;
+          localStorage.setItem(STORAGE_KEY, JSON.stringify(serverAttempts));
+        }
+      }
+    } catch (err) {
+      if (DOM.classroomWifiUrl) DOM.classroomWifiUrl.textContent = window.location.origin;
+    }
+
+    renderTeacherDashboardStats(list);
+  }
+
+  function renderTeacherDashboardStats(list) {
     const total = list.length;
     DOM.statTotalAttempts.textContent = total;
+
+    // Progress bar fallback calculation
+    const pct = Math.min(100, Math.round((total / state.serverCapacity) * 100));
+    if (DOM.cohortProgressFill && !DOM.cohortProgressFill.style.width) {
+      DOM.cohortProgressFill.style.width = `${pct}%`;
+    }
+    if (DOM.cohortProgressText && (!DOM.cohortProgressText.textContent || DOM.cohortProgressText.textContent.includes('0 / 60'))) {
+      DOM.cohortProgressText.textContent = `${total} / ${state.serverCapacity} Submitted (${pct}%)`;
+    }
+    if (DOM.cohortRemainingText && (!DOM.cohortRemainingText.textContent || DOM.cohortRemainingText.textContent.includes('60 Remaining'))) {
+      DOM.cohortRemainingText.textContent = `${Math.max(0, state.serverCapacity - total)} Remaining to Submit`;
+    }
 
     if (total === 0) {
       DOM.statClassAverage.textContent = '0.0';
@@ -1249,24 +1334,42 @@
     if (state.isHostAuthenticated) {
       DOM.teacherModal.classList.add('active');
       renderTeacherDashboard();
+      startHostPolling();
     } else {
       openHostAuthModal(() => {
         DOM.teacherModal.classList.add('active');
         renderTeacherDashboard();
+        startHostPolling();
       });
     }
   });
 
   DOM.btnCloseTeacherModal.addEventListener('click', () => {
     DOM.teacherModal.classList.remove('active');
+    stopHostPolling();
   });
 
   DOM.btnCloseTeacherModal2.addEventListener('click', () => {
     DOM.teacherModal.classList.remove('active');
+    stopHostPolling();
   });
 
   if (DOM.btnLockHostMode) {
     DOM.btnLockHostMode.addEventListener('click', lockHostMode);
+  }
+
+  // Copy Classroom Wi-Fi URL Button
+  if (DOM.btnCopyClassUrl) {
+    DOM.btnCopyClassUrl.addEventListener('click', () => {
+      const urlText = DOM.classroomWifiUrl ? DOM.classroomWifiUrl.textContent.trim() : '';
+      if (urlText && !urlText.includes('Loading')) {
+        navigator.clipboard.writeText(urlText).then(() => {
+          showToast('✓ Classroom URL copied! Share with all 60 students.', 'success');
+        }).catch(() => {
+          showToast(`URL: ${urlText}`, 'info');
+        });
+      }
+    });
   }
 
   // Host Auth Form & Modal Listeners
@@ -1281,9 +1384,12 @@
 
   DOM.btnExportClassCsv.addEventListener('click', exportClassMasterCsv);
 
-  DOM.btnClearData.addEventListener('click', () => {
-    if (confirm('Are you sure you want to clear all student quiz records from this device?')) {
+  DOM.btnClearData.addEventListener('click', async () => {
+    if (confirm('Are you sure you want to clear all student quiz records from this device and host server?')) {
       localStorage.removeItem(STORAGE_KEY);
+      try {
+        await fetch('/api/attempts', { method: 'DELETE' });
+      } catch (e) {}
       renderTeacherDashboard();
       showToast('All previous quiz session records cleared.', 'info');
     }
@@ -1293,6 +1399,7 @@
   DOM.teacherModal.addEventListener('click', (e) => {
     if (e.target === DOM.teacherModal) {
       DOM.teacherModal.classList.remove('active');
+      stopHostPolling();
     }
   });
 
@@ -1321,4 +1428,5 @@
   // Init
   preloadLogoBase64();
   updateHostModeUI();
+
 })();

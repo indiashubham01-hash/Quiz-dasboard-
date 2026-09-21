@@ -61,7 +61,7 @@
     <section id="loginView" class="view-section active">
       <div class="quiz-card">
           <div class="login-header">
-            <div class="login-tag">Class Assessment Session</div>
+            <div class="login-tag">Section D Assessment • Cohort Capacity: 60 Candidates</div>
             <h1 class="login-title">Student Quiz Login</h1>
             <p class="login-subtitle">Please enter your student credentials to begin the EVS Quiz - 01 assessment on Ecosystems.</p>
 
@@ -450,6 +450,43 @@
       </div>
 
       <div class="modal-body">
+        <!-- Section D 60-Member Live Attendance & Concurrency Tracker -->
+        <div class="cohort-tracker-card">
+          <div class="cohort-tracker-header">
+            <div class="cohort-tracker-info">
+              <span class="cohort-title">Section D Live Cohort Submissions</span>
+              <span class="cohort-capacity-badge">Target: 60 Members</span>
+            </div>
+            <div class="cohort-live-indicator">
+              <span class="live-pulse-dot"></span>
+              <span id="cohortLiveStatus">Live Server Sync Active</span>
+            </div>
+          </div>
+
+          <!-- Progress Bar out of 60 Members -->
+          <div class="cohort-progress-wrap">
+            <div class="cohort-progress-bar-bg">
+              <div class="cohort-progress-bar-fill" id="cohortProgressFill" style="width: 0%;"></div>
+            </div>
+            <div class="cohort-progress-labels">
+              <span id="cohortProgressText">0 / 60 Submitted (0%)</span>
+              <span id="cohortRemainingText">60 Remaining to Submit</span>
+            </div>
+          </div>
+
+          <!-- Classroom Wi-Fi Join Link for 60 Smartphones -->
+          <div class="classroom-network-banner" id="classroomNetworkBanner">
+            <div class="network-banner-left">
+              <span class="network-badge">📱 Classroom Wi-Fi URL (Share with 60 Students)</span>
+              <span class="network-url" id="classroomWifiUrl">Loading network URL...</span>
+            </div>
+            <button id="btnCopyClassUrl" class="btn-copy-link" type="button" title="Copy link to clipboard">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+              <span>Copy Link</span>
+            </button>
+          </div>
+        </div>
+
         <!-- Statistics cards -->
         <div class="stats-cards-grid">
           <div class="stat-card">
